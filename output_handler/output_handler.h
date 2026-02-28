@@ -4,19 +4,29 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include "main.h"
+#include "ina219.h"
+#include "gpio_handler.h"
 
 typedef enum
 {
-    OUTPUT_ENABLED,
-    OUTPUT_DISABLED
-}output_state_t;
+    OUTPUT_STATUS_NOT_INITIALIZED,
+    OUTPUT_STATUS_NO_VOLTAGE,
+    OUTPUT_STATUS_NO_CURRENT,
+    OUTPUT_STATUS_ENABLED_NO_CURRENT
+}output_status_t;
 
-bool initialize_output_handler(const uint8_t pin_numbers[NUMBER_OF_CHANNELS]);
+typedef struct
+{
+    char name[20];
 
-bool change_output_state(uint8_t output_number, output_state_t state);
-output_state_t get_output_state(uint8_t output_number);
-bool reset_all_outputs(void);
-void cleanup_outputs(void);
+    gpio_t gpio;
+    INA219_t current_sensor;
+    bool enabled;
+}output_t;
+
+bool output_init(output_t *out);
+bool output_enable(output_t *out);
+bool output_disable(output_t *out);
+bool output_update_measurement(output_t *out);
 
 #endif //__OUTPUT_HANDLER_H__

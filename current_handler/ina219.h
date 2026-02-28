@@ -15,6 +15,8 @@ typedef struct {
     float power_lsb;
     uint16_t calibration_value;
     int16_t fd;
+    float max_current;
+    float max_power;
 } INA219_config_t;
 
 typedef struct {
@@ -27,7 +29,8 @@ typedef struct
 {
     INA219_config_t config;
     INA219_data_t data;
-}INA219_channel_handler_t;
+    uint8_t error_flag;
+}INA219_t;
 
 typedef enum
 {
