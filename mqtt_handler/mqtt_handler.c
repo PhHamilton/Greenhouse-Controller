@@ -1,5 +1,6 @@
 #include "mqtt_handler.h"
 #include <stdio.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
@@ -9,7 +10,6 @@
 #include "cJSON.h"
 #include "mqtt_message_handler.h"
 
-#define MAX_PARAMETER_SIZE 100
 
 mqtt_handler_status_t cleanup_and_exit(char *data, cJSON *json, mqtt_handler_status_t status);
 mqtt_handler_status_t initialize_mqtt(void);
@@ -24,33 +24,8 @@ void *heartbeat_thread(void *arg);
 static mqtt_topic_handler_t registered_callbacks[MAX_SUBSCRIPTION_TOPICS];
 static uint8_t registered_callback_count = 0;
 
-typedef struct
-{
-    char **topics;
-    uint8_t size;
-}pub_sub_t;
 
-typedef struct
-{
-    char client_id[MAX_PARAMETER_SIZE];
-    char address[MAX_PARAMETER_SIZE];
-    uint16_t port;
-    pub_sub_t publish_topics;
-    pub_sub_t subscription_topics;
-    uint8_t QOS;
-    uint16_t keep_alive;
-    struct
-    {
-        char message_online[MAX_PARAMETER_SIZE];
-        char message_offline[MAX_PARAMETER_SIZE];
-        char topic[MAX_PARAMETER_SIZE];
-        uint8_t QOS;
-        bool retain;
-    }last_will;
-   uint16_t heartbeat_interval;
-}mqtt_parameters_t;
-
-static mqtt_parameters_t mqtt_parameters = {"\0"};
+mqtt_parameters_t mqtt_parameters = {"\0"};
 static struct mosquitto *mqtt_client = NULL;
 
 mqtt_handler_status_t initialize_mqtt_handler(const char* config_path)
@@ -326,7 +301,7 @@ void *heartbeat_thread(void *arg)
 {
     while(1)
     {
-//        sleep(mqtt_parameters.heartbeat_interval);
+        sleep(mqtt_parameters.heartbeat_interval);
 
         cJSON *root = cJSON_CreateObject();
         cJSON *data_array = cJSON_CreateArray();
@@ -351,7 +326,21 @@ void *heartbeat_thread(void *arg)
 
         if(json_string)
         {
-            publish_message("power_controller/heartbeat", json_string);
+            char *topic = NULL;
+
+            for(uint8_t i = 0; i < mqtt_parameters.publish_topics.size; i++)
+            {
+                if(strstr(mqtt_parameters.publish_topics.topics[i], "heartbeat"))
+                {
+                    topic = mqtt_parameters.publish_topics.topics[i];
+                    break;
+                }
+            }
+            if(topic)
+            {
+                publish_message(topic, json_string);
+            }
+
             free(json_string);
         }
 

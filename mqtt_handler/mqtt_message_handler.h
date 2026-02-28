@@ -5,15 +5,6 @@
 #include "cJSON.h"
 #include <stdint.h>
 
-typedef enum
-{
-    VOLTAGE_3V3,
-    VOLTAGE_5V,
-    VOLTAGE_12V,
-    VOLTAGE_NEG12V,
-    ALL
-}status_request_type_t;
-
 void status_update_handler(const char* topic, const char* message);
 void output_update_handler(const char* topic, const char* message);
 

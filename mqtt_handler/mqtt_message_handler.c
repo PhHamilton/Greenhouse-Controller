@@ -4,7 +4,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-bool get_start_end_index(status_request_type_t request, uint8_t *start_index, uint8_t *end_index);
+extern mqtt_parameters_t mqtt_parameters;
+
 bool validate_json_number(cJSON *parent, const char *key, uint8_t *out_value);
 
 cJSON *create_data_item(uint8_t id, uint8_t status, float voltage, float current);
@@ -31,8 +32,7 @@ void status_update_handler(const char* topic, const char* message)
 
     cJSON_AddNumberToObject(root, "Request", request);
 
-    uint8_t start = 0, end = 0;
-
+/*
     if(!get_start_end_index((status_request_type_t)request, &start, &end))
     {
         fprintf(stderr, "Unable to fetch loop indexes\n");
@@ -40,7 +40,6 @@ void status_update_handler(const char* topic, const char* message)
         cJSON_Delete(root);
         return;
     }
-/*
     for(uint8_t i = start; i <= end; i++)
     {
         if(i < NUMBER_OF_CHANNELS)
@@ -63,7 +62,19 @@ void status_update_handler(const char* topic, const char* message)
 
     if(json_string)
     {
-        publish_message("power_controller/response", json_string);
+        const char* topic = NULL;
+        for(uint8_t i = 0; i < mqtt_parameters.publish_topics.size; i++)
+        {
+            if(strstr(mqtt_parameters.publish_topics.topics[i], "/response"))
+            {
+                topic = mqtt_parameters.publish_topics.topics[i];
+            }
+        }
+
+        if(topic)
+        {
+            publish_message(topic, json_string);
+        }
         free(json_string);
     }
 
@@ -99,8 +110,7 @@ void output_update_handler(const char* topic, const char* message)
 
     cJSON_AddNumberToObject(root, "Request", request);
 
-    uint8_t start = 0, end = 0;
-
+    /*
     if(!get_start_end_index((status_request_type_t)request, &start, &end))
     {
         fprintf(stderr, "Unable to fetch loop indexes\n");
@@ -113,7 +123,6 @@ void output_update_handler(const char* topic, const char* message)
     {
         if(i < NUMBER_OF_CHANNELS)
         {
-            /*
             if(status != gui_parameters.measurements[i].output_state)
             {
                 gui_parameters.measurements[i].output_state = status;
@@ -126,9 +135,9 @@ void output_update_handler(const char* topic, const char* message)
                                                     gui_parameters.measurements[i].output_state
                                                    )
                                 );
-            */
         }
     }
+    */
 
     cJSON_AddItemToObject(root, "Data", data_array);
     char *json_string = cJSON_PrintUnformatted(root);
@@ -164,33 +173,6 @@ cJSON *create_status_item(uint8_t id, uint8_t status)
     cJSON_AddNumberToObject(data_item, "Status", status);
 
     return data_item;
-}
-
-bool get_start_end_index(status_request_type_t request, uint8_t *start_index, uint8_t *end_index)
-{
-    switch(request)
-    {
-        case ALL:
-        {
-            *start_index = VOLTAGE_3V3;
-            *end_index = VOLTAGE_NEG12V;
-        }
-        break;
-        case VOLTAGE_3V3:
-        case VOLTAGE_5V:
-        case VOLTAGE_12V:
-        case VOLTAGE_NEG12V:
-        {
-            *start_index = *end_index = request;
-            break;
-        }
-        default:
-        {
-            fprintf(stderr, "Unknown request %d\n", request);
-            return false;
-        }
-    }
-    return true;
 }
 
 bool validate_json_number(cJSON *parent, const char *key, uint8_t *out_value)

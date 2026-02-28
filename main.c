@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include "unistd.h"
 #include "output_handler.h"
+#include "mqtt_handler.h"
+#include "mqtt_message_handler.h"
 
 int main(int argc, char **argv)
 {
@@ -38,6 +40,23 @@ int main(int argc, char **argv)
 
     sleep(1);
     output_disable(&led);
+
+    const char* config_path = "./mqtt_handler/config.json";
+
+    if(initialize_mqtt_handler(config_path) != MQTT_HANDLER_OK)
+    {
+        printf("Failed to initialize MQTT");
+    }
+
+    if(start_mqtt_client() != MQTT_HANDLER_OK)
+    {
+        printf("Failed to start MQTT client");
+    }
+
+    mqtt_register_callback("ghc/status_update", status_update_handler);
+//    mqtt_register_callback("ghc/output_update", output_update_handler);
+
+    while(1);
 
     return 0;
 }

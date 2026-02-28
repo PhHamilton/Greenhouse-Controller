@@ -1,18 +1,18 @@
 {
     "MQTT":
     {
-        "client_id": "power_controller",
+        "client_id": "GHC",
         "address": "localhost",
         "port": 1883,
-        "subscription_topics": ["power_controller/status_update", "power_controller/output_update"],
-        "publish_topics": ["power_controller/response", "power_controller/heartbeat", "power_controller/online"],
+        "subscription_topics": ["ghc/status_update", "ghc/output_update"],
+        "publish_topics": ["ghc/response", "ghc/heartbeat", "ghc/online"],
         "QOS": 2,
         "keep_alive": 60,
         "last_will":
         {
-            "message_online": "{\"id\": \"power_controller\", \"online\": true}",
-            "message_offline": "{\"id\": \"power_controller\", \"online\": false}",
-            "topic": "power_controller/online",
+            "message_online": "{\"id\": \"ghc\", \"online\": true}",
+            "message_offline": "{\"id\": \"ghc\", \"online\": false}",
+            "topic": "ghc/online",
             "QOS": 2,
             "retain": true
         },
