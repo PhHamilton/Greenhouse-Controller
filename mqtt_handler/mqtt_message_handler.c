@@ -33,32 +33,31 @@ void status_update_handler(const char* topic, const char* message)
 
     cJSON_AddNumberToObject(root, "Request", request);
 
-/*
-    if(!get_start_end_index((status_request_type_t)request, &start, &end))
-    {
-        fprintf(stderr, "Unable to fetch loop indexes\n");
-        cJSON_Delete(json);
-        cJSON_Delete(root);
-        return;
-    }
-    for(uint8_t i = start; i <= end; i++)
-    {
-        if(i < NUMBER_OF_CHANNELS)
-        {
-            cJSON_AddItemToArray(
-                                 data_array,
-                                 create_data_item(
-                                                  i,
-                                                  gui_parameters.measurements[i].output_state,
-                                                  gui_parameters.measurements[i].voltage,
-                                                  gui_parameters.measurements[i].current
-                                                 )
-                                );
-        }
-    }
-*/
+    cJSON *data = cJSON_CreateObject();
+    cJSON_AddItemToObject(root, "Data", data);
 
-    cJSON_AddItemToObject(root, "Data", data_array);
+    cJSON_AddNumberToObject(data, "ID", 1); //
+    cJSON_AddNumberToObject(data, "Status", 1); //Define status!
+
+    cJSON *climate = cJSON_CreateObject();
+    cJSON_AddItemToObject(data, "Climate", climate);
+    cJSON_AddNumberToObject(climate, "Temperature", 20);
+    cJSON_AddNumberToObject(climate, "Humidity", 50);
+
+    cJSON *outputs = cJSON_CreateArray();
+    cJSON_AddItemToObject(data, "Outputs", outputs);
+
+    cJSON *output = cJSON_CreateObject();
+    cJSON_AddItemToArray(outputs, output);
+    cJSON_AddStringToObject(output, "Name", "Light");
+    cJSON_AddNumberToObject(output, "State", 0);
+    cJSON_AddNumberToObject(output, "Type", 0);
+    cJSON *current_measurements = cJSON_CreateObject();
+    cJSON_AddItemToObject(output, "Measurements", current_measurements);
+    cJSON_AddNumberToObject(current_measurements, "Voltage", 3);
+    cJSON_AddNumberToObject(current_measurements, "Current", 100);
+    cJSON_AddNumberToObject(current_measurements, "Power", 300);
+
     char *json_string = cJSON_PrintUnformatted(root);
 
     if(json_string)
@@ -111,37 +110,9 @@ void output_update_handler(const char* topic, const char* message)
 
     cJSON_AddNumberToObject(root, "Request", request);
 
+    cJSON *data = cJSON_CreateObject();
+    cJSON_AddItemToObject(root, "Data", data);
 
-    /*
-    if(!get_start_end_index((status_request_type_t)request, &start, &end))
-    {
-        fprintf(stderr, "Unable to fetch loop indexes\n");
-        cJSON_Delete(json);
-        cJSON_Delete(root);
-        return;
-    }
-
-    for(uint8_t i = start; i <= end; i++)
-    {
-        if(i < NUMBER_OF_CHANNELS)
-        {
-            if(status != gui_parameters.measurements[i].output_state)
-            {
-                gui_parameters.measurements[i].output_state = status;
-            }
-
-            cJSON_AddItemToArray(
-                                 data_array,
-                                 create_status_item(
-                                                    i,
-                                                    gui_parameters.measurements[i].output_state
-                                                   )
-                                );
-        }
-    }
-    */
-
-    cJSON_AddItemToObject(root, "Data", data_array);
     char *json_string = cJSON_PrintUnformatted(root);
 
     if(json_string)
@@ -196,7 +167,6 @@ bool validate_json_number(cJSON *parent, const char *key, uint8_t *out_value)
     return true;
 }
 
-
 bool validate_json_object(cJSON *parent, const char *key)
 {
     cJSON *item = cJSON_GetObjectItem(parent,key);
@@ -207,7 +177,7 @@ bool validate_json_object(cJSON *parent, const char *key)
         return false;
     }
 
-    if(!cJSON.IsObject(item))
+    if(!cJSON_IsObject(item))
     {
         fprintf(stderr, "'%s' item is not an object\n", key);
         return false;

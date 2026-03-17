@@ -306,17 +306,6 @@ void *heartbeat_thread(void *arg)
         cJSON *root = cJSON_CreateObject();
         cJSON *data_array = cJSON_CreateArray();
 
-            /*
-        for(uint8_t i = 0; i < NUMBER_OF_CHANNELS; i++)
-        {
-            cJSON_AddItemToArray(data_array,
-                                 create_status_item(i,
-                                                    gui_parameters.measurements[i].output_state
-                                                   )
-                                );
-        }
-            */
-
         cJSON_AddItemToObject(root, "Data", data_array);
 
         time_t timestamp = time(NULL);
