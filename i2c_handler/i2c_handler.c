@@ -6,15 +6,42 @@
 #include <sys/ioctl.h>
 #include <linux/i2c-dev.h>
 
-int i2c_write_register(uint8_t addr, uint8_t reg, uint16_t value)
+int i2c_init(i2c_config_t *conf)
 {
-    int fd = open("/dev/i2c-1", O_RDWR);
-    if (fd < 0)
-        return -1;
+    if(!conf) return -1;
 
-    if(ioctl(fd, I2C_SLAVE, addr) < 0)
+    conf->fd = open(conf->bus, O_RDWR);
+    if(conf->fd < 0) return -1;
+
+    if(ioctl(conf->fd, I2C_SLAVE, conf->addr) < 0)
     {
-        close(fd);
+        close(conf->fd);
+        return -1;
+    }
+    return 0;
+}
+
+int i2c_write_read_register(i2c_config_t *conf, uint8_t reg, uint16_t value)
+{
+    int rc = i2c_write_register(conf, reg, value);
+    if(rc != 0) return rc;
+
+    uint16_t read_back;
+    rc = i2c_read_register(conf, reg, &read_back);
+
+    if(rc != 0)
+    {
+        return rc;
+    }
+
+    if(read_back != value) return -4;
+
+    return 0;
+}
+int i2c_write_register(i2c_config_t *conf, uint8_t reg, uint16_t value)
+{
+    if(!conf || conf->fd < 0)
+    {
         return -1;
     }
 
@@ -23,44 +50,33 @@ int i2c_write_register(uint8_t addr, uint8_t reg, uint16_t value)
     buf[1] = (value >> 8) & 0xFF;   // MSB
     buf[2] = value & 0xFF;          // LSB
 
-    if(write(fd, buf, 3) != 3)
+    if(write(conf->fd, buf, 3) != 3)
     {
-        close(fd);
         return -1;
     }
 
-    close(fd);
     return 0;
 }
 
-int i2c_read_register(uint8_t addr, uint8_t reg, uint16_t *value)
+int i2c_read_register(i2c_config_t *conf, uint8_t reg, uint16_t *value)
 {
-    int fd = open("/dev/i2c-1", O_RDWR);
-    if (fd < 0)
-        return -1;
-
-    if(ioctl(fd, I2C_SLAVE, addr) < 0)
+    if(!conf || conf->fd < 0 || !value)
     {
-        close(fd);
         return -1;
     }
 
-    if(write(fd, &reg, 1) != 1)
+    if(write(conf->fd, &reg, 1) != 1)
     {
-        close(fd);
         return -1;
     }
 
     uint8_t buf[2];
-    if(read(fd, buf, 2) != 2)
+    if(read(conf->fd, buf, 2) != 2)
     {
-        close(fd);
         return -1;
     }
 
     *value = (buf[0] << 8) | buf[1];
 
-    close(fd);
     return 0;
 }
-

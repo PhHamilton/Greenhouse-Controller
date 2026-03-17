@@ -7,6 +7,7 @@
 extern mqtt_parameters_t mqtt_parameters;
 
 bool validate_json_number(cJSON *parent, const char *key, uint8_t *out_value);
+bool validate_json_object(cJSON *parent, const char *key);
 
 cJSON *create_data_item(uint8_t id, uint8_t status, float voltage, float current);
 
@@ -110,6 +111,7 @@ void output_update_handler(const char* topic, const char* message)
 
     cJSON_AddNumberToObject(root, "Request", request);
 
+
     /*
     if(!get_start_end_index((status_request_type_t)request, &start, &end))
     {
@@ -191,5 +193,25 @@ bool validate_json_number(cJSON *parent, const char *key, uint8_t *out_value)
         return false;
     }
     *out_value = item->valueint;
+    return true;
+}
+
+
+bool validate_json_object(cJSON *parent, const char *key)
+{
+    cJSON *item = cJSON_GetObjectItem(parent,key);
+
+    if(!item)
+    {
+        fprintf(stderr, "Missing '%s' item\n", key);
+        return false;
+    }
+
+    if(!cJSON.IsObject(item))
+    {
+        fprintf(stderr, "'%s' item is not an object\n", key);
+        return false;
+    }
+
     return true;
 }

@@ -1,10 +1,15 @@
 The messages sent shall be in JSON format
 Status message:
     {"Request": <Request type>}
-    <Request type>: Enum {3V3, 5V, 12V, -12V, ALL}
+    <Request type>: Enum {DATA, UPDATE_OUTPUT}
 Status response:
-    {"Request": <Request type>, "Data": [{"ID": <id>, "Status": <Status>, "Voltage": <Voltage>, "Current:" <current>, "Power:" <power>}]
+    {"Request": <Request type>, "Data": {"ID": <id>, "Status": <Status>, "Climate": {"Temperature: <Temperature>, "Humidity": <Humidity>}, "Outputs": [{"Name", <name>, "State": <state>, "Type": <Output type>, "Measurements": {<measurements>}}]}}
+
+    <Output Type>: ENUM {CURRENT_SENSOR}
+        Light: State - On or Off
+    <Measurements>:
+        Current Sensor: {"Voltage": <voltage>, "Current": <current>, "Power": <power>}
 
 Update message
-    {"Request": <Request type>, "Status": <status>}
+    {"Request": <Request type>, "Output": {"Name": <name>, "Status": <status>}
     <status>: Enum {DISABLE, ENABLE}

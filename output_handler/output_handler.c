@@ -32,6 +32,7 @@ bool output_update_measurement(output_t *out)
     if(!out->enabled)
         return false;
 */
+
     if(ina219_read(&out->current_sensor.config, &out->current_sensor.data) != INA219_OK)
     {
         return false;
