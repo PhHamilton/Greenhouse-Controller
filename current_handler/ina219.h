@@ -9,7 +9,6 @@
 #define INA219_ADDRESS_1 0x40
 
 typedef struct {
-    uint8_t address;
     float shunt_resistance;
     float max_current;
     i2c_config_t i2c_conf;
