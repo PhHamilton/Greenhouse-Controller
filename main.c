@@ -7,20 +7,6 @@
 
 int main(int argc, char **argv)
 {
-    const char* config_path = "./mqtt_handler/config.json";
-
-    if(initialize_mqtt_handler(config_path) != MQTT_HANDLER_OK)
-    {
-        printf("Failed to initialize MQTT");
-        return 1;
-    }
-
-    if(start_mqtt_client() != MQTT_HANDLER_OK)
-    {
-        printf("Failed to start MQTT client");
-        return 1;
-    }
-
     mqtt_register_callback("ghc/status_update", status_update_handler);
 //    mqtt_register_callback("ghc/output_update", output_update_handler);
 
@@ -90,6 +76,21 @@ int main(int argc, char **argv)
     output_disable(&led);
 */
 
+    const char* config_path = "./mqtt_handler/config.json";
+
+    if(initialize_mqtt_handler(config_path) != MQTT_HANDLER_OK)
+    {
+        printf("Failed to initialize MQTT");
+        return 1;
+    }
+
+    if(start_mqtt_client() != MQTT_HANDLER_OK)
+    {
+        printf("Failed to start MQTT client");
+        return 1;
+    }
+
+ 
 
     while(1);
     return 0;
