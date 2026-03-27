@@ -70,11 +70,16 @@ int main(int argc, char **argv)
 
     printf("Voltage: %f\n Current: %f\n", led.current_sensor.data.voltage, led.current_sensor.data.current);
 
+    if(!SHT30D_get_data(&climate) == SHT30D_OK)
+    {
+        printf("Failed to read data from climate sensor\n");
+        return 1;
+    }
 
-/*
+    printf("Temperature: %f\n Humidity: %f\n", climate.data.temperature, climate.data.humidity);
+
     sleep(1);
     output_disable(&led);
-*/
 
     const char* config_path = "./mqtt_handler/config.json";
 
