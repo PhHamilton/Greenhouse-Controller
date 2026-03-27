@@ -8,10 +8,16 @@
 
 int i2c_init(i2c_config_t *conf)
 {
-    if(!conf) return -1;
+    if(!conf)
+    {
+        return -1;
+    }
 
     conf->fd = open(conf->bus, O_RDWR);
-    if(conf->fd < 0) return -1;
+    if(conf->fd < 0)
+    {
+        return -1;
+    }
 
     if(ioctl(conf->fd, I2C_SLAVE, conf->addr) < 0)
     {
@@ -38,6 +44,36 @@ int i2c_write_read_register(i2c_config_t *conf, uint8_t reg, uint16_t value)
 
     return 0;
 }
+
+int i2c_write_bytes(i2c_config_t *conf, uint8_t* bytes, uint8_t size)
+{
+    if(!conf || conf->fd< 0)
+    {
+        return -1;
+    }
+
+    if(write(conf->fd, bytes, size) != size)
+    {
+        return -1;
+    }
+
+    return 0;
+}
+
+int i2c_read_bytes(i2c_config_t *conf, uint8_t *data, uint8_t size)
+{
+    if(!conf || conf->fd < 0)
+    {
+        return -1;
+    }
+
+    if(read(conf->fd, data, size) != size)
+    {
+        return -1;
+    }
+    return 0;
+}
+
 int i2c_write_register(i2c_config_t *conf, uint8_t reg, uint16_t value)
 {
     if(!conf || conf->fd < 0)

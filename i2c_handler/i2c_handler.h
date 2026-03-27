@@ -22,4 +22,7 @@ int i2c_write_read_register(i2c_config_t *conf, uint8_t reg, uint16_t value);
 int i2c_write_register(i2c_config_t *conf, uint8_t reg, uint16_t value);
 int i2c_read_register(i2c_config_t *conf, uint8_t reg, uint16_t *value);
 
+int i2c_write_bytes(i2c_config_t *conf, uint8_t* bytes, uint8_t size);
+int i2c_read_bytes(i2c_config_t *conf, uint8_t *data, uint8_t size);
+
 #endif //__I2C_HANDLER_H__
